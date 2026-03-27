@@ -29,21 +29,39 @@ def generate_sql_commands(FILENAME, OUTPUT_SQL):
         with open(OUTPUT_SQL, "w") as out:
             # Table creation
             create_flood_table = f"""
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{flood_table}') AND type in (N'U'))
-BEGIN
-    CREATE TABLE {flood_table} (
-        id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-        polygon_id INTEGER NOT NULL,
-        time DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
-        flooded INTEGER NOT NULL,
-        depth_class INTEGER NOT NULL,
-        depth_min FLOAT NULL,
-        depth_max FLOAT NULL,
-        area_sq_km FLOAT NULL,
-        geometry GEOMETRY NOT NULL                             
-    );
-END
-"""
+                IF OBJECT_ID(N'{flood_table}', N'U') IS NOT NULL
+                BEGIN
+                    DROP TABLE {flood_table};
+                END;
+
+                CREATE TABLE {flood_table} (
+                    id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+                    polygon_id INTEGER NOT NULL,
+                    time DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+                    flooded INTEGER NOT NULL,
+                    depth_class INTEGER NOT NULL,
+                    depth_min FLOAT NULL,
+                    depth_max FLOAT NULL,
+                    area_sq_km FLOAT NULL,
+                    geometry GEOMETRY NOT NULL                             
+                );
+            """
+#             create_flood_table = f"""
+# IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{flood_table}') AND type in (N'U'))
+# BEGIN
+#     CREATE TABLE {flood_table} (
+#         id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+#         polygon_id INTEGER NOT NULL,
+#         time DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+#         flooded INTEGER NOT NULL,
+#         depth_class INTEGER NOT NULL,
+#         depth_min FLOAT NULL,
+#         depth_max FLOAT NULL,
+#         area_sq_km FLOAT NULL,
+#         geometry GEOMETRY NOT NULL                             
+#     );
+# END
+# """
             out.write("-- Table Setup\n")
             out.write(create_flood_table + ";\nGO\n\n")
             out.write("-- Populating Flood Map Data\n")
